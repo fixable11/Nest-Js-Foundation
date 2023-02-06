@@ -1,4 +1,18 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto';
+import { ValidateNested, IsEmail } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+class UpdatedUser {
+  @IsEmail()
+  email?: string;
+
+  password?: string;
+
+  bio?: string = null;
+  image?: string = null;
+}
+
+export class UpdateUserDto {
+  @ValidateNested()
+  @Type(() => UpdatedUser)
+  user: UpdatedUser;
+}

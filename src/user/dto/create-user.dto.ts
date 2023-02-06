@@ -4,6 +4,7 @@ import {
   ValidateNested,
   IsObject,
   Length,
+  IsNotEmptyObject,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -27,5 +28,6 @@ export class CreateUserDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UserDto)
+  @IsNotEmptyObject()
   user: UserDto;
 }
