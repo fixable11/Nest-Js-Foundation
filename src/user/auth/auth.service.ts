@@ -13,9 +13,7 @@ export class AuthService {
   ) {}
 
   createToken(user: User): string {
-    const token = this.jwtService.sign(user.getClaims());
-
-    return token;
+    return this.jwtService.sign(user.getClaims());
   }
 
   async validateUser(

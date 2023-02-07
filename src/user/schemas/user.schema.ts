@@ -1,13 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Document } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
-export class User {
-  @Prop({ type: mongoose.Types.ObjectId })
-  _id: string;
-
+export class User extends Document {
   @Prop({ type: String, required: true })
   email: string;
 
@@ -23,33 +20,43 @@ export class User {
   @Prop()
   image: string;
 
-  getId(): string {
-    return this._id;
-  }
+  getId: () => string;
 
-  getPassword(): string {
-    return this.password;
-  }
+  getPassword: () => string;
 
-  getClaims() {
-    return {
-      sub: this.username,
-      username: this.username,
-      email: this.email,
-      bio: this.bio,
-      image: this.image || 'https://picsum.photos/200',
-    };
-  }
+  getClaims: () => Record<string, any>;
 
-  toJson(): Record<string, any> {
-    const { password, bio, image, ...properties } = this;
-
-    return {
-      image: image || 'https://picsum.photos/200',
-      bio: bio || null,
-      ...properties,
-    };
-  }
+  toJson: () => Record<string, any>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.methods.getId = function (): string {
+  return this._id;
+};
+
+UserSchema.methods.getPassword = function (): string {
+  return this.password;
+};
+
+UserSchema.methods.getClaims = function (): Record<string, any> {
+  return {
+    sub: this.username,
+    username: this.username,
+    email: this.email,
+    bio: this.bio,
+    image: this.image || 'https://picsum.photos/200',
+  };
+};
+
+UserSchema.methods.toJson = function (): Record<string, any> {
+  const { _id, email, username, bio, image } = this;
+
+  return {
+    _id,
+    email,
+    username,
+    image: image || 'https://picsum.photos/200',
+    bio: bio || null,
+  };
+};

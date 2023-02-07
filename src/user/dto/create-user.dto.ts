@@ -5,6 +5,7 @@ import {
   IsObject,
   Length,
   IsNotEmptyObject,
+  MinLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -17,6 +18,7 @@ class UserDto {
   @Length(1, 100)
   username: string;
 
+  @MinLength(6)
   @IsNotEmpty()
   password: string;
 

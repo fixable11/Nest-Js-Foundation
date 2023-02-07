@@ -1,46 +1,65 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseFilters,
+  UseGuards,
+  Put,
+  Request,
+  Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ErrorFilter } from '../filters/ErrorFilter';
+import { AuthService } from './auth/auth.service';
+import { User } from './schemas/user.schema';
+import { LoginDto } from './dto/login.dto';
+import { LocalAuthGuard } from './auth/local-auth.guard';
+import { JwtAuthGuard } from './auth/jwt.auth-guard';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   @UseFilters(ErrorFilter)
   @Post('/')
-  create(@Body() createUserDto: CreateUserDto) {
-    console.log(createUserDto);
-    return this.userService.create(createUserDto);
+  async createUser(@Body() createUserDto: CreateUserDto): Promise<any> {
+    const user: User = await this.userService.create(createUserDto);
+    const token = this.authService.createToken(user);
+
+    return {
+      user: user.toJson(),
+      token,
+    };
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @UseGuards(LocalAuthGuard)
+  @Post('/login')
+  async authorize(@Body() loginDto: LoginDto) {
+    const user = await this.userService.findByEmail(loginDto.user.email);
+    const token = this.authService.createToken(user);
+
+    return {
+      user: user.toJson(),
+      token,
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
+  @UseGuards(JwtAuthGuard)
+  @Patch('/')
+  async updateUser(@Request() req, @Body() dto: UpdateUserDto) {
+    const user = await this.userService.findByEmail(req.user.email);
+    const updatedUser = await this.userService.updateUser(user, dto);
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
+    const token = this.authService.createToken(updatedUser);
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return {
+      user: user.toJson(),
+      token,
+    };
   }
 }

@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsEmail, ValidateNested, IsObject } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsEmail,
+  ValidateNested,
+  IsObject,
+  MinLength,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class UserDto {
@@ -7,6 +13,7 @@ class UserDto {
   email: string;
 
   @IsNotEmpty()
+  @MinLength(6)
   password: string;
 }
 
